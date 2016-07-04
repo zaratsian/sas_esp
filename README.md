@@ -5,6 +5,6 @@ These scripts require a valid license of SAS Event Stream Processing (http://www
 
 Feel free to clone the projects and modify them for your own use. 
 
-Contact me with any comments/questions:d.zaratsian@gmail.com.
+Contact me with any comments/questions:d.zaratsian-at-gmail.com.
 
 -dz-
