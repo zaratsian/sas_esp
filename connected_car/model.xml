@@ -1,0 +1,277 @@
+ <engine port="61053" name="SGF">
+   <projects>
+     <project name="Project" pubsub="auto" threads="1">
+       <contqueries>
+         <contquery name="CQ">
+           <windows>
+             <window-source name="Data_Stream" pubsub="true" insert-only="true" collapse-updates="true">
+               <schema>
+                 <fields>
+                   <field name="record_id" type="string" key="true"/>
+                   <field name="Vehicle_id" type="string" key="true"/>
+                   <field name="Measurement_timestamp" type="string"/>
+                   <field name="Vehicle_speed_sensor" type="double"/>
+                   <field name="Vibration" type="double"/>
+                   <field name="Engine_Load" type="double"/>
+                   <field name="Engine_Coolant_Temp" type="int64"/>
+                   <field name="Intake_Manifold_Pressure" type="double"/>
+                   <field name="Engine_RPM" type="double"/>
+                   <field name="Speed_OBD" type="int64"/>
+                   <field name="Intake_Air_Temp" type="int64"/>
+                   <field name="Mass_Air_Flow_Rate" type="double"/>
+                   <field name="Throttle_Pos_Manifold" type="double"/>
+                   <field name="Voltage_Control_Module" type="double"/>
+                   <field name="Ambient_air_temp" type="int64"/>
+                   <field name="Accel_Pedal_Pos_D" type="double"/>
+                   <field name="Engine_Oil_Temp" type="int64"/>
+                   <field name="Speed_GPS" type="double"/>
+                   <field name="GPS_Longitude" type="double"/>
+                   <field name="GPS_Latitude" type="double"/>
+                   <field name="GPS_Bearing" type="double"/>
+                   <field name="GPS_Altitude" type="int64"/>
+                   <field name="Turbo_Boost_And_Vcm_Gauge" type="double"/>
+                   <field name="Trip_Distance" type="double"/>
+                   <field name="Litres_Per_100km_Inst" type="double"/>
+                   <field name="Accel_Ssor_Total" type="double"/>
+                   <field name="CO2_in_g_per_km_Inst" type="double"/>
+                   <field name="Trip_Time_journey" type="double"/>
+                   <field name="CO_emission" type="int64"/>
+                   <field name="HC_emission" type="int64"/>
+                   <field name="PM_emission" type="int64"/>
+                   <field name="NOx_emission" type="int64"/>
+                   <field name="uCO2_emission" type="int64"/>
+                   <field name="Fuel_level" type="int64"/>
+                   <field name="Oil_life" type="int64"/>
+                   <field name="Vibration_alert" type="int64"/>
+                   <field name="Vibration_alert_since_start" type="int64"/>
+                   <field name="Vibration_alert_recent" type="int64"/>
+                   <field name="Turbo_alert" type="int64"/>
+                   <field name="Emission_alert" type="int64"/>
+                   <field name="Fog_control" type="int64"/>
+                   <field name="Engine_control" type="int64"/>
+                 </fields>
+               </schema>
+             </window-source>
+             <window-procedural name="Predictive_Model" collapse-updates="true">
+               <schema>
+                 <fields>
+                   <field name="record_id" type="string" key="true"/>
+                   <field name="Vehicle_id" type="string" key="true"/>
+                   <field name="Measurement_timestamp" type="string"/>
+                   <field name="P_FAILURE0" type="double"/>
+                   <field name="P_FAILURE1" type="double"/>
+                   <field name="V_FAILURE0" type="double"/>
+                   <field name="V_FAILURE1" type="double"/>
+                 </fields>
+               </schema>
+               <ds2-code source="Data_Stream"><![CDATA[ds2_options sas tkgmac;
+ data esp.out;
+ dcl double Accel_Pedal_Pos_D;
+dcl double Engine_Load;
+dcl double Engine_RPM;
+dcl double Intake_Manifold_Pressure;
+dcl double Litres_Per_100km_Inst;
+dcl double Mass_Air_Flow_Rate;
+dcl double Throttle_Pos_Manifold;
+dcl double Trip_Distance;
+dcl double Trip_Time_journey;
+dcl double Vehicle_speed_sensor;
+method run();
+set esp.in;
+_WARN_ = ' ';
+if ^MISSING(TRIP_TIME_JOURNEY) & ((TRIP_TIME_JOURNEY >= 10026.2)) then 
+do ;
+if ^MISSING(ENGINE_RPM) & ((ENGINE_RPM >= 1761.6)) then do ;
+if ^MISSING(MASS_AIR_FLOW_RATE) & ((MASS_AIR_FLOW_RATE < 51.6215)) then 
+do ;
+if ^MISSING(ACCEL_PEDAL_POS_D) & ((ACCEL_PEDAL_POS_D >= 27.12156951)) 
+then do ;
+_NODE_ = 18.0;
+_LEAF_ = 8.0;
+P_FAILURE0 = 0.0;
+P_FAILURE1 = 1.0;
+V_FAILURE0 = .;
+V_FAILURE1 = .;
+end;
+ else do ;
+_NODE_ = 17.0;
+_LEAF_ = 7.0;
+P_FAILURE0 = 1.0;
+P_FAILURE1 = 0.0;
+V_FAILURE0 = 0.0;
+V_FAILURE1 = 1.0;
+end;
+end;
+ else do ;
+_NODE_ = 12.0;
+_LEAF_ = 3.0;
+P_FAILURE0 = 1.0;
+P_FAILURE1 = 0.0;
+V_FAILURE0 = 0.85714286;
+V_FAILURE1 = 0.14285714;
+end;
+end;
+ else do ;
+_NODE_ = 5.0;
+_LEAF_ = 0.0;
+P_FAILURE0 = 0.0;
+P_FAILURE1 = 1.0;
+V_FAILURE0 = 0.0021691974;
+V_FAILURE1 = 0.9978308;
+end;
+end;
+ else do ;
+if ^MISSING(THROTTLE_POS_MANIFOLD) & ((THROTTLE_POS_MANIFOLD < 37.5294128)) 
+then do ;
+if ^MISSING(INTAKE_MANIFOLD_PRESSURE) & ((INTAKE_MANIFOLD_PRESSURE < 102.12)) 
+then do ;
+_NODE_ = 7.0;
+_LEAF_ = 1.0;
+P_FAILURE0 = 0.0;
+P_FAILURE1 = 1.0;
+V_FAILURE0 = 0.0;
+V_FAILURE1 = 1.0;
+end;
+ else do ;
+if ^MISSING(ENGINE_LOAD) & ((ENGINE_LOAD < 29.0)) then do ;
+_NODE_ = 13.0;
+_LEAF_ = 4.0;
+P_FAILURE0 = 1.0;
+P_FAILURE1 = 0.0;
+V_FAILURE0 = 1.0;
+V_FAILURE1 = 0.0;
+end;
+ else do ;
+if ^MISSING(ENGINE_LOAD) & ((ENGINE_LOAD < 38.0)) then do ;
+_NODE_ = 19.0;
+_LEAF_ = 9.0;
+P_FAILURE0 = 0.0;
+P_FAILURE1 = 1.0;
+V_FAILURE0 = 1.0;
+V_FAILURE1 = 0.0;
+end;
+ else do ;
+if ^MISSING(LITRES_PER_100KM_INST) & ((LITRES_PER_100KM_INST < 8.137457099999999)) 
+then do ;
+_NODE_ = 21.0;
+_LEAF_ = 10.0;
+P_FAILURE0 = 0.8;
+P_FAILURE1 = 0.2;
+V_FAILURE0 = 0.66666667;
+V_FAILURE1 = 0.33333333;
+end;
+ else do ;
+if ^MISSING(VEHICLE_SPEED_SENSOR) & ((VEHICLE_SPEED_SENSOR < 11.16)) then 
+do ;
+_NODE_ = 23.0;
+_LEAF_ = 11.0;
+P_FAILURE0 = 0.0;
+P_FAILURE1 = 1.0;
+V_FAILURE0 = 0.0;
+V_FAILURE1 = 1.0;
+end;
+ else do ;
+_NODE_ = 24.0;
+_LEAF_ = 12.0;
+P_FAILURE0 = 0.5;
+P_FAILURE1 = 0.5;
+V_FAILURE0 = 1.0;
+V_FAILURE1 = 0.0;
+end;
+end;
+end;
+end;
+end;
+end;
+ else do ;
+if ^MISSING(ENGINE_RPM) & ((ENGINE_RPM >= 2091.9)) then do ;
+if ^MISSING(TRIP_DISTANCE) & ((TRIP_DISTANCE < 163.6796328)) then do ;
+_NODE_ = 15.0;
+_LEAF_ = 5.0;
+P_FAILURE0 = 0.03030303;
+P_FAILURE1 = 0.96969697;
+V_FAILURE0 = 0.0;
+V_FAILURE1 = 1.0;
+end;
+ else do ;
+_NODE_ = 16.0;
+_LEAF_ = 6.0;
+P_FAILURE0 = 1.0;
+P_FAILURE1 = 0.0;
+V_FAILURE0 = 1.0;
+V_FAILURE1 = 0.0;
+end;
+end;
+ else do ;
+_NODE_ = 9.0;
+_LEAF_ = 2.0;
+P_FAILURE0 = 1.0;
+P_FAILURE1 = 0.0;
+V_FAILURE0 = 1.0;
+V_FAILURE1 = 0.0;
+end;
+end;
+end;
+_return: ;
+end;
+ enddata;]]></ds2-code>
+             </window-procedural>
+             <window-copy name="VehicleSpeed" collapse-updates="true">
+               <retention type="bycount_sliding">1</retention>
+             </window-copy>
+             <window-copy name="EngineRPM" collapse-updates="true">
+               <retention type="bycount_sliding">1</retention>
+             </window-copy>
+             <window-aggregate name="Aggregation" collapse-updates="true">
+               <schema>
+                 <fields>
+                   <field name="Vehicle_id" type="string" key="true"/>
+                   <field name="Mass_Air_FR_Average" type="double"/>
+                   <field name="Mass_Air_FR_STD" type="double"/>
+                 </fields>
+               </schema>
+               <output>
+                 <field-expr><![CDATA[ESP_aAve(Mass_Air_Flow_Rate)]]></field-expr>
+                 <field-expr><![CDATA[ESP_aStd(Mass_Air_Flow_Rate)]]></field-expr>
+               </output>
+             </window-aggregate>
+             <window-join name="Join" collapse-updates="true">
+               <join type="leftouter" no-regenerates="true">
+                 <conditions>
+                   <fields left="Vehicle_id" right="Vehicle_id"/>
+                 </conditions>
+               </join>
+               <output>
+                 <field-selection name="Vehicle_speed_sensor" source="l_Vehicle_speed_sensor"/>
+                 <field-selection name="Vibration" source="l_Vibration"/>
+                 <field-selection name="Engine_Load" source="l_Engine_Load"/>
+                 <field-selection name="Engine_Coolant_Temp" source="l_Engine_Coolant_Temp"/>
+                 <field-selection name="Intake_Manifold_Pressure" source="l_Intake_Manifold_Pressure"/>
+                 <field-selection name="Engine_RPM" source="l_Engine_RPM"/>
+                 <field-selection name="Speed_OBD" source="l_Speed_OBD"/>
+                 <field-selection name="Mass_Air_FR_Average" source="r_Mass_Air_FR_Average"/>
+                 <field-selection name="Mass_Air_FR_STD" source="r_Mass_Air_FR_STD"/>
+               </output>
+             </window-join>
+             <window-copy name="Mass_Air_Flow_Rate" collapse-updates="true">
+               <retention type="bycount_sliding">10</retention>
+             </window-copy>
+             <window-filter name="Failures" collapse-updates="true">
+               <expression><![CDATA[P_FAILURE1 > 0 OR V_FAILURE1 > 0]]></expression>
+             </window-filter>
+           </windows>
+           <edges>
+             <edge source="Data_Stream" target="Predictive_Model"/>
+             <edge source="Data_Stream" target="VehicleSpeed"/>
+             <edge source="Data_Stream" target="EngineRPM"/>
+             <edge source="Data_Stream" target="Join"/>
+             <edge source="Aggregation" target="Join"/>
+             <edge source="Data_Stream" target="Mass_Air_Flow_Rate"/>
+             <edge source="Mass_Air_Flow_Rate" target="Aggregation"/>
+             <edge source="Predictive_Model" target="Failures"/>
+           </edges>
+         </contquery>
+       </contqueries>
+     </project>
+   </projects>
+ </engine>

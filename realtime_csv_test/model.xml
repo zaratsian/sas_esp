@@ -1,0 +1,31 @@
+
+<engine name="Tweets">
+  <projects>
+    <project name="Project" pubsub="auto" threads="1">
+      <contqueries>
+        <contquery name="CQ">
+          <windows>
+            <window-source name="Data_Input" pubsub="true" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="ID" type="string" key="true"/>
+                  <field name="Letter" type="string"/>
+                  <field name="Datetime" type="string"/>
+                  <field name="Sentence" type="string"/>
+                  <field name="Value" type="double"/>
+                </fields>
+              </schema>
+            </window-source>
+            <window-filter name="Filter" output-insert-only="true" collapse-updates="true">
+              <expression><![CDATA[ID == 2]]></expression>
+            </window-filter>
+          </windows>
+          <edges>
+            <edge source="Data_Input" target="Filter"/>
+          </edges>
+        </contquery>
+      </contqueries>
+    </project>
+  </projects>
+</engine>
+

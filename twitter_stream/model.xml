@@ -1,0 +1,150 @@
+
+<engine port="61053" name="Tweets">
+  <projects>
+    <project name="Twitter" pubsub="auto" threads="1">
+      <contqueries>
+        <contquery name="CQ1">
+          <windows>
+            <window-source name="Data_Input" pubsub="true" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="ID" type="string" key="true"/>
+                  <field name="Timestamp" type="string"/>
+                  <field name="Author" type="string"/>
+                  <field name="Tweets" type="string"/>
+                  <field name="Followers" type="int64"/>
+                </fields>
+              </schema>
+            </window-source>
+            <window-filter name="Influential_Authors_Filter" output-insert-only="true" collapse-updates="true">
+              <expression><![CDATA[Followers >= 10000]]></expression>
+            </window-filter>
+            <window-aggregate name="Influential_Authors" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="Author" type="string" key="true"/>
+                  <field name="Tweet_Volume" type="int64"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[ESP_aCount()]]></field-expr>
+              </output>
+            </window-aggregate>
+            <window-aggregate name="Tweet_Volume" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="Timestamp" type="string" key="true"/>
+                  <field name="Tweet_Volume" type="int64"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[ESP_aCount()]]></field-expr>
+              </output>
+            </window-aggregate>
+            <window-copy name="Trending_Authors_60sec" collapse-updates="true">
+              <retention type="bytime_sliding">60 seconds</retention>
+            </window-copy>
+            <window-aggregate name="Trending_Authors" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="Author" type="string" key="true"/>
+                  <field name="Author_Count_60sec" type="int64"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[ESP_aCount()]]></field-expr>
+              </output>
+            </window-aggregate>
+            <window-textcontext name="Entity_Extraction" index="pi_EMPTY" collapse-updates="true" liti-files="media.li" text-field="Tweets"/>
+            <window-textcategory name="Text_Category" index="pi_EMPTY" collapse-updates="true" mco-file="banking.mco" text-field="Tweets"/>
+            <window-textsentiment name="textSentimentWindow" index="pi_EMPTY" sam-file="sentiment.sam" text-field="Tweets"/>
+            <window-compute name="Assign_Variables_Categories" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="ID" type="string" key="true"/>
+                  <field name="catNum" type="int32" key="true"/>
+                  <field name="score" type="double"/>
+                  <field name="category" type="string"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[score]]></field-expr>
+                <field-expr><![CDATA[category]]></field-expr>
+              </output>
+            </window-compute>
+            <window-join name="Join_Categories" collapse-updates="true">
+              <join type="leftouter">
+                <conditions>
+                  <fields left="ID" right="ID"/>
+                </conditions>
+              </join>
+              <output>
+                <field-selection name="Category_ID" source="l_ID"/>
+                <field-selection name="Category_ID2" source="l_catNum"/>
+                <field-selection name="Category_Timestamp" source="r_Timestamp"/>
+                <field-selection name="Text" source="r_Tweets"/>
+                <field-selection name="Category_Desc" source="l_category"/>
+                <field-selection name="Relevancy" source="l_score"/>
+              </output>
+            </window-join>
+            <window-aggregate name="Trends_Categories" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="Category_Timestamp" type="string" key="true"/>
+                  <field name="Category_Desc" type="string" key="true"/>
+                  <field name="Category_Freq" type="int64"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[ESP_aCount()]]></field-expr>
+              </output>
+            </window-aggregate>
+            <window-aggregate name="Entities_Aggregated" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="term" type="string" key="true"/>
+                  <field name="Entity_Freq" type="int64"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[ESP_aCount()]]></field-expr>
+              </output>
+            </window-aggregate>
+        
+
+            <window-aggregate name="Aggregated_Sentiment" collapse-updates="true">
+              <schema>
+                <fields>
+                  <field name="sentiment" type="string" key="true"/>
+                  <field name="sentiment_count" type="int64"/>
+                </fields>
+              </schema>
+              <output>
+                <field-expr><![CDATA[ESP_aCount()]]></field-expr>
+              </output>
+            </window-aggregate>
+ 
+          </windows>
+          <edges>
+            <edge source="Data_Input" target="Influential_Authors_Filter"/>
+            <edge source="Data_Input" target="textSentimentWindow"/>
+            <edge source="Influential_Authors_Filter" target="Influential_Authors"/>
+            <edge source="Data_Input" target="Tweet_Volume"/>
+            <edge source="Data_Input" target="Trending_Authors_60sec"/>
+            <edge source="Trending_Authors_60sec" target="Trending_Authors"/>
+            <edge source="Data_Input" target="Entity_Extraction"/>
+            <edge source="Data_Input" target="Text_Category"/>
+            <edge source="Text_Category" target="Assign_Variables_Categories"/>
+            <edge source="Data_Input" target="textSentimentWindow"/>
+            <edge source="Assign_Variables_Categories" target="Join_Categories"/>
+            <edge source="Data_Input" target="Join_Categories"/>
+            <edge source="Join_Categories" target="Trends_Categories"/>
+            <edge source="Entity_Extraction" target="Entities_Aggregated"/>
+            <edge source="textSentimentWindow" target="Aggregated_Sentiment"/>
+          </edges>
+        </contquery>
+      </contqueries>
+    </project>
+  </projects>
+</engine>
+
