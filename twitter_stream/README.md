@@ -11,9 +11,9 @@
 
 3) Set the Twitter credentials for the following 4 variables within stream.py. 
 You can create your own credentials at https://dev.twitter.com/
-  key          = ""
-  secret       = ""
-  token        = ""
-  token_secret = ""
+  <br>key          = ""
+  <br>secret       = ""
+  <br>token        = ""
+  <br>token_secret = ""
 
 4) Start the project by running ./start_esp.sh
