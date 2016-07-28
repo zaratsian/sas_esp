@@ -14,7 +14,7 @@ except:
 
 twitter_url = 'https://stream.twitter.com/1.1/statuses/filter.json?language=en&track=' + query
 
-host         = '45.55.207.56'
+host         = 'localhost'
 url          = 'http://' + str(host) + ':61051/SASESP/windows/Twitter/CQ1/Data_Input/state?value=injected'
 headers      = {'Content-Type': 'application/xml'}
 
